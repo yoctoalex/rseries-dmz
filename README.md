@@ -11,13 +11,11 @@
   - [1.2 Deploy CE Tenant on F5 rSeries](#12-deploy-ce-tenant-on-f5-rseries)
   - [1.2.1 Create Secure Mesh Site in XC Cloud](#121-create-secure-mesh-site-in-xc-cloud)
   - [1.2.2 Deploy CE Tenant on F5 rSeries](#122-deploy-ce-tenant-on-f5-rseries)
-  - [1.3 Deploy Big-IP on F5 rSeries : \>\>\> TODO: confirm](#13-deploy-big-ip-on-f5-rseries---todo-confirm)
+  - [1.3 Deploy Big-IP on F5 rSeries](#13-deploy-big-ip-on-f5-rseries)
   - [1.4 Configure Application VMs](#14-configure-application-vms)
-  - [1.4.2 Configure Main Application VM](#142-configure-main-application-vm)
-  - [1.4.2 Configure Partners Application VM](#142-configure-partners-application-vm)
-- [2. SaaS-Hybrid Global Edge Configuration](#2-saas-hybrid-global-edge-configuration)
-  - [2.1 Configure Virtual Site](#21-configure-virtual-site)
-  - [2.2 Create Big-IP Virtual Server](#22-create-big-ip-virtual-server)
+- [2. Expose Application to the Internet](#2-expose-application-to-the-internet)
+  - [2.1 Create Big-IP Virtual Server](#21-create-big-ip-virtual-server)
+  - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
   - [2.3 Create External HTTP Load Balancer](#23-create-external-http-load-balancer)
 - [3. Protect Application](#3-protect-application)
   - [3.1 Configure WAF](#31-configure-waf)
@@ -26,17 +24,17 @@
   - [3.4 Configure DDoS Protection](#34-configure-ddos-protection)
   - [3.5 Configure Malicious User and IP Reputation](#35-configure-malicious-user-and-ip-reputation)
   - [3.6 Verify Application](#36-verify-application)
-- [4. SaaS-Hybrid Customer Edge Configuration](#4-saas-hybrid-customer-edge-configuration)
-  - [4.1 Create Internal HTTP Load Balancer](#41-create-internal-http-load-balancer)
-- [5. SaaS-Multisite Customer Edge Configuration](#5-saas-multisite-customer-edge-configuration)
-  - [5.1 Configure Second Data Center](#51-configure-second-data-center)
-  - [5.2 Configure Second Virtual Site](#52-configure-second-virtual-site)
-  - [5.3 Setup DMZ Configuration](#53-setup-dmz-configuration)
+- [4. Extend Solution with Additional Data Center](#4-extend-solution-with-additional-data-center)
+  - [4.1 Configure Second Data Center](#41-configure-second-data-center)
+  - [4.2 Configure Second Virtual Site](#42-configure-second-virtual-site)
+  - [4.3 Setup DMZ Configuration](#43-setup-dmz-configuration)
 
 
 # Overview
 
 # Setup Diagram
+
+![rseris](./assets/rSeries-device.png)
 
 # 1. Configure Environment
 
@@ -91,15 +89,36 @@ From the `Generate Node Token` dialog, copy the token.
 
 ## 1.2.2 Deploy CE Tenant on F5 rSeries
 
-Sign in to the F5 rSeries interface and navigate to the `Multi-Cloud Network Connect` page. Click on the `Add Tenant` button.
+Sign in to the F5 rSeries interface and navigate to the `TENANT MANAGEMENT` tab. Click on the `Tenant Images`. Then click on the `Upload` button. Select the image you downloaded in the previous step.
 
-## 1.3 Deploy Big-IP on F5 rSeries : >>> TODO: confirm
+![rseries-sms](./assets/rseries-tenant.png)
+
+Open `Tenant Deployments` and click on the `Add` button.
+
+![rseries-sms](./assets/rseries-upload.png)
+
+Fill in the required fields:
+ - `Name`: dc1-dmz
+ - `Type`: Generic
+ - `Image`: select the image you uploaded
+ - `IP Address`: IP address of the SLO interface
+ - `Gayeway`: Gateway IP address
+ - `VLANs`: check the `SLO` and `SLI` VLANs
+ - `vCPUs`: 2
+ - `Virtual Disk Size`: 60 GB
+ - `Metadata`: paste the token you copied in the previous step and VLAN ID in the following format: `[primary-vlan:SLO token:your_token_from_xc_cloud]`
+
+Click on the `Save & Close` button to apply the changes.
+
+![rseries-sms](./assets/rseries-details.png)
+
+Go back to the XC Cloud and navigate to the `Sites` and wait until the site is deployed and provisioned.
+
+![rseries-sms](./assets/rseries-confirm.png)
+
+## 1.3 Deploy Big-IP on F5 rSeries
 
 ## 1.4 Configure Application VMs
-
-There are two application VMs that need to be configured. The first VM is the main application VM, which is the VM that hosts the main application. The second VM is located in the partners network and is used to simulate a partner application.
-
-## 1.4.2 Configure Main Application VM
 
 The main application is a simple web application that simulates a banking application. The application is hosted on an Ubuntu VM. The following steps are required to configure the main application VM:
 
@@ -115,25 +134,57 @@ Verify that the application is running by accessing `http://{{your_vm_ip}}:8080`
 
 ![Secure Mesh Site](./assets/vmware_app.png)
 
-## 1.4.2 Configure Partners Application VM
+# 2. Expose Application to the Internet
 
-The second application represents a refer-a-friend module that is hosted in the partners network. After configuring the module, the main application will be able to call the partners application and you will see the refer-a-friend section in the main application.
+## 2.1 Create Big-IP Virtual Server
 
-The following steps are required to configure the partners application VM:
+In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
 
-- SSH into the VM
-- Install [docker and docker-compose](https://docs.docker.com/engine/install/ubuntu/)
-- Clone the repository
-- Open `./application/refer-a-friend-module/` folder
-- Run `docker compose up -d`
+Open the Big-IP interface and navigate to the `Local Traffic` tab. Click on the `Pools` and then click on the `Create` button.
 
-# 2. SaaS-Hybrid Global Edge Configuration
+![bigip](./assets/bigip_pool_create.png)
 
-## 2.1 Configure Virtual Site
+Fill in the required fields:
+- `Name`: application-pool
+- `Health Monitors`: select `http`
+- `Node Name`: give a name to the node
+- `Address`: IP address of the application VM
+- `Service Port`: 8080
+
+Click on the `Add` button to add the node to the pool and then click on the `Finished` button to create the pool.
+
+![bigip](./assets/bigip_pool_details.png)
+
+Go back to the `Local Traffic` tab and click on the `Virtual Servers`. Then click on the `Create` button.
+
+![bigip](./assets/bigip_vs_navigate.png)
+
+Fill in the required fields:
+- `Name`: arcadia-application
+- `Destination Address`: select the `SLI` network IP address
+- `Service Port`: 8080
+
+Set `HTTP Profile (Client)` to `http`
+
+![bigip](./assets/bigip_vs_name.png)
+
+Set `Source Address Translation` to `Auto Map`
+
+![bigip](./assets/bigip_vs_map.png)
+
+Set `Default Pool` to `application-pool` and click on the `Finished` button to create the Virtual Server.
+
+![bigip](./assets/bigip_vs_pool.png)
+
+The application is now exposed to the XC SLI network. You can try to access the application using the IP address of the SLI network.
+
+## 2.2 Configure XC Virtual Site
 
 In order to expose our application with two Secure Mesh Sites for failover to the internet, we need to combine them using Virtual Site and then add an HTTP Load Balancer. You can see the setup in the diagram below.
 
 >>>> TODO: add diagramm
+
+
 ![Virtual Site](./assets/virtual_site_dc1.png)
 
 Let's start with adding a virtual site. Back in the F5 Distributed Cloud Console, navigate to the **Shared Configuration** service. From there, select **Virtual Sites** and click the **Add Virtual Site** button.
@@ -144,7 +195,7 @@ In the opened form give virtual site a name that we specified as [label](#12-cre
 
 ![Virtual Site](./assets/virtual_site_config.png)
 
-## 2.2 Create Big-IP Virtual Server
+
 
 ## 2.3 Create External HTTP Load Balancer
 
@@ -249,7 +300,7 @@ To verify the Bot Protection, try to access the application using a browser or c
 ```bash
 curl -i -X POST https://arcadia-dmz.f5-cloud-demo.com/trading/auth
 
-HTTP/2 403
+HTTP/2 403 
 server: volt-adc
 strict-transport-security: max-age=31536000
 cache-control: no-cache
@@ -278,14 +329,10 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 ![Configure](./assets/http_discovery.png)
 
-# 4. SaaS-Hybrid Customer Edge Configuration
+# 4. Extend Solution with Additional Data Center
 
-## 4.1 Create Internal HTTP Load Balancer
+## 4.1 Configure Second Data Center
 
-# 5. SaaS-Multisite Customer Edge Configuration
+## 4.2 Configure Second Virtual Site
 
-## 5.1 Configure Second Data Center
-
-## 5.2 Configure Second Virtual Site
-
-## 5.3 Setup DMZ Configuration
+## 4.3 Setup DMZ Configuration

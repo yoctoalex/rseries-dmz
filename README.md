@@ -97,6 +97,10 @@ Open `Tenant Deployments` and click on the `Add` button.
 
 ![rseries-sms](./assets/rseries-upload.png)
 
+![rseries-sms](./assets/rseries-create.png)
+
+
+
 Fill in the required fields:
  - `Name`: dc1-dmz
  - `Type`: Generic
@@ -110,13 +114,25 @@ Fill in the required fields:
 
 Click on the `Save & Close` button to apply the changes.
 
-![rseries-sms](./assets/rseries-details.png)
+![rseries-sms](./assets/rseries-details_part_1.png)
+
+![rseries-sms](./assets/rseries-details_part_2.png)
 
 Go back to the XC Cloud and navigate to the `Sites` and wait until the site is deployed and provisioned.
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
 ## 1.3 Deploy Big-IP on F5 rSeries
+
+![rseries-bigip](./assets/f5os_bigip_tenant_image.png)
+
+![rseries-bigip](./assets/f5os_bigip_tenant_image_upload.png)
+
+![rseries-bigip](./assets/f5os_bigip_create.png)
+
+![rseries-bigip](./assets/f5os_bigip_create_part_1.png)
+
+![rseries-bigip](./assets/f5os_bigip_create_part_2.png)
 
 ## 1.4 Configure Application VMs
 

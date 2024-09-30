@@ -11,8 +11,10 @@
   - [1.2 Deploy CE Tenant on F5 rSeries](#12-deploy-ce-tenant-on-f5-rseries)
   - [1.2.1 Create Secure Mesh Site in XC Cloud](#121-create-secure-mesh-site-in-xc-cloud)
   - [1.2.2 Deploy CE Tenant on F5 rSeries](#122-deploy-ce-tenant-on-f5-rseries)
-  - [1.3 Deploy Big-IP on F5 rSeries](#13-deploy-big-ip-on-f5-rseries)
-  - [1.4 Configure Application VMs](#14-configure-application-vms)
+  - [1.3 Deploy and Confgiure Big-IP on F5 rSeries](#13-deploy-and-confgiure-big-ip-on-f5-rseries)
+  - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
+  - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
+  - [1.5 Configure Application VMs](#15-configure-application-vms)
 - [2. Expose Application to the Internet](#2-expose-application-to-the-internet)
   - [2.1 Create Big-IP Virtual Server](#21-create-big-ip-virtual-server)
   - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
@@ -24,9 +26,6 @@
   - [3.4 Configure DDoS Protection](#34-configure-ddos-protection)
   - [3.5 Configure Malicious User and IP Reputation](#35-configure-malicious-user-and-ip-reputation)
   - [3.6 Verify Application](#36-verify-application)
-- [4. Extend Solution with Additional Data Center](#4-extend-solution-with-additional-data-center)
-  - [4.1 Configure Second Data Center](#41-configure-second-data-center)
-  - [4.2 Configure Second Virtual Site](#42-configure-second-virtual-site)
   - [4.3 Setup DMZ Configuration](#43-setup-dmz-configuration)
 
 
@@ -122,7 +121,9 @@ Go back to the XC Cloud and navigate to the `Sites` and wait until the site is d
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
-## 1.3 Deploy Big-IP on F5 rSeries
+## 1.3 Deploy and Confgiure Big-IP on F5 rSeries
+
+## 1.3.1 Deploy Big-IP on F5 rSeries
 
 ![rseries-bigip](./assets/f5os_bigip_tenant_image.png)
 
@@ -134,7 +135,18 @@ Go back to the XC Cloud and navigate to the `Sites` and wait until the site is d
 
 ![rseries-bigip](./assets/f5os_bigip_create_part_2.png)
 
-## 1.4 Configure Application VMs
+## 1.3.2 Configure Big-IP on F5 rSeries
+
+![rseries-bigip](./assets/bigip_config_vlan_navigate.png)
+
+![rseries-bigip](./assets/bigip_config_vlan_create.png)
+
+![rseries-bigip](./assets/bigip_config_selfip_navigate.png)
+
+![rseries-bigip](./assets/bigip_config_selfip_create.png)
+
+
+## 1.5 Configure Application VMs
 
 The main application is a simple web application that simulates a banking application. The application is hosted on an Ubuntu VM. The following steps are required to configure the main application VM:
 
@@ -246,7 +258,7 @@ Then click **Add Item** to add an origin server.
 
 ![HTTP LB](./assets/http_lb_pool_origin.png)
 
-Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **192.168.1.100** private IP. Then in the drop-down menu select the [Virtual Site](#21-configure-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
+Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.5.11.20** private IP (your BigIP XC interface). Then in the drop-down menu select the [Virtual Site](#21-configure-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
 
 ![HTTP LB](./assets/http_lb_pool_details.png)
 
@@ -405,10 +417,52 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 ![Configure](./assets/http_discovery.png)
 
-# 4. Extend Solution with Additional Data Center
-
-## 4.1 Configure Second Data Center
-
-## 4.2 Configure Second Virtual Site
-
 ## 4.3 Setup DMZ Configuration
+
+Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
+
+To do that go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#22-create-http-load-balancer).
+
+![Second DC](./assets/dc2_manage.png)
+
+Click the **Edit Configuration** button to enable the editing mode.
+
+![Second DC](./assets/dc2_edit.png)
+
+Scroll to the **Origins** section and click the **Add Item** button. This will open origin pool creation form.
+
+![Second DC](./assets/dc2_add_pool.png)
+
+Open the **Origin Pool** drop-down menu and click **Add Item** to add an origin pool.
+
+![Second DC](./assets/dc2_create_pool.png)
+
+Give origin pool a name.
+
+![Second DC](./assets/dc2_pool_name.png)
+
+Then click **Add Item** to add an origin server.
+
+![Second DC](./assets/dc2_add_origin.png)
+
+Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.6.11.20** private IP (Your BigIP XC interface in the second DC). Then in the drop-down menu select the [Virtual Site](#42-configure-second-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
+
+![Second DC](./assets/dc2_configure_origin.png)
+
+Type in the **8080** origin server port.
+
+![Second DC](./assets/dc2_port.png)
+
+Scroll down and click **Continue**.
+
+![Second DC](./assets/dc2_save_pool.png)
+
+Change the **Priority** of the origin pool to **0**. This will make the second origin pool backup for the first one. **Apply** origin pool configuration.
+
+![Second DC](./assets/dc2_apply_pool.png)
+
+The second configured origin pool will appear on the list.
+
+![Second DC](./assets/dc2_pool_result.png)
+
+Now that we have added and configured the second origin pool of the HTTP Load Balancer for the second Data Center, click **Save and Exit** to save it.

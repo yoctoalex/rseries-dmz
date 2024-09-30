@@ -16,7 +16,7 @@
 - [2. Expose Application to the Internet](#2-expose-application-to-the-internet)
   - [2.1 Create Big-IP Virtual Server](#21-create-big-ip-virtual-server)
   - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
-  - [2.3 Create External HTTP Load Balancer](#23-create-external-http-load-balancer)
+  - [2.3 Create HTTP Load Balancer](#23-create-http-load-balancer)
 - [3. Protect Application](#3-protect-application)
   - [3.1 Configure WAF](#31-configure-waf)
   - [3.2 Configure Bot Protection](#32-configure-bot-protection)
@@ -212,8 +212,68 @@ In the opened form give virtual site a name that we specified as [label](#12-cre
 ![Virtual Site](./assets/virtual_site_config.png)
 
 
+## 2.3 Create HTTP Load Balancer
 
-## 2.3 Create External HTTP Load Balancer
+Next, we will configure HTTP Load Balancer to expose the created Virtual Site connecting two Secure Mesh Sites to the Internet.
+
+![HTTP LB](./assets/http_lb_overview.png)
+
+Proceed to the **Multi-Cloud App Connect** service => **Load Balancers** => **HTTP Load Balancers**. Click the **Add HTTP Load Balancer** button.
+
+![HTTP LB](./assets/http_lb_create.png)
+
+First, give HTTP Load Balancer a name.
+
+![HTTP LB](./assets/http_lb_name.png)
+
+Then we will configure **Domains and LB Type** section. Type in the **arcadia-dmz.f5-cloud-demo.com** domain and select **HTTPS with Automatic Certificate** as Load Balancer Type. Make sure to enable HTTP redirect to HTTPS and add HSTS header.
+
+![HTTP LB](./assets/http_lb_domain.png)
+
+Scroll down to the **Origins** section and add an origin pool by clicking the **Add Item** button.
+
+![HTTP LB](./assets/http_lb_origin.png)
+
+Open the **Origin Pool** drop-down menu and click **Add Item** to add an origin pool.
+
+![HTTP LB](./assets/http_lb_add_pool.png)
+
+Give origin pool a name.
+
+![HTTP LB](./assets/http_lb_pool_name.png)
+
+Then click **Add Item** to add an origin server.
+
+![HTTP LB](./assets/http_lb_pool_origin.png)
+
+Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **192.168.1.100** private IP. Then in the drop-down menu select the [Virtual Site](#21-configure-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
+
+![HTTP LB](./assets/http_lb_pool_details.png)
+
+Type in the **8080** origin server port.
+
+![HTTP LB](./assets/http_lb_pool_port.png)
+
+Scroll down to the **Health Checks** section and click the **Add Item** button to add a health check.
+
+![HTTP LB](./assets/http_lb_health_add.png)
+
+Give health check a name and leave the default settings. Then click **Continue** to save the health check configuration.
+
+![HTTP LB](./assets/http_lb_health_details.png)
+
+Scroll down and click **Continue**.
+
+![HTTP LB](./assets/http_lb_pool_save.png)
+
+**Apply** origin pool configuration.
+
+![HTTP LB](./assets/http_lb_pool_apply.png)
+
+Now that the HTTP Load Balancer is configured, click **Save and Exit** to save it.
+
+![HTTP LB](./assets/http_lb_save.png)
+
 
 # 3. Protect Application
 

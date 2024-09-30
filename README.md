@@ -26,11 +26,22 @@
   - [3.4 Configure DDoS Protection](#34-configure-ddos-protection)
   - [3.5 Configure Malicious User and IP Reputation](#35-configure-malicious-user-and-ip-reputation)
   - [3.6 Verify Application](#36-verify-application)
-  - [4.3 Setup DMZ Configuration](#43-setup-dmz-configuration)
+- [4. Setup DMZ Configuration](#4-setup-dmz-configuration)
 
 # Overview
 
+This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup in the XC Cloud environment using the F5 rSeries hardware platform. The setup includes the following components:
+
+- Configuration of Data Centers with CE Sites for failover;
+- Demo application deployment in the Data Center;
+- XC Cloud Secure Mesh Site configuration and combining them into a single Virtual Site;
+- Application exposure to the Internet using HTTP Load Balancer;
+- Application protection with Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery;
+- Upgrading the solution with a second Data Center and configuring HTTP Load Balancer for a complete DMZ configuration.
+
 # Setup Diagram
+
+The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides unprecedented level of performance and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual server is configured. Our sample app Arcadia is inside the Virtual Server of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
 
 ![rseris](./assets/rSeries-device.png)
 
@@ -261,8 +272,6 @@ In the opened form give virtual site a name that we specified as [label](#12-cre
 
 Next, we will configure HTTP Load Balancer to expose the created Virtual Site connecting two Secure Mesh Sites to the Internet.
 
-![HTTP LB](./assets/http_lb_overview.png)
-
 Proceed to the **Multi-Cloud App Connect** service => **Load Balancers** => **HTTP Load Balancers**. Click the **Add HTTP Load Balancer** button.
 
 ![HTTP LB](./assets/http_lb_create.png)
@@ -323,8 +332,6 @@ Now that the HTTP Load Balancer is configured, click **Save and Exit** to save i
 
 Now that we have exposed the Virtual Site with two Secure Mesh Sites to the Internet using an HTTP Load Balancer, we will configure protection for the deployed application: WAF, Bot Protect, API Discovery, DDoS Protection, and Malicious User and IP Reputation.
 
-![Protect](./assets/protect_overview.png)
-
 To do that go back to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the created HTTP Load Balancer.
 
 ![Configure](./assets/configure_manage.png)
@@ -383,8 +390,6 @@ You will see Bot Defense Policy settings. Click the **Apply** button to proceed.
 
 Now that the Bot Protection is configured for the HTTP Load Balancer, we can move on to API Discovery.
 
-![Configure](./assets/configure_bot_ready.png)
-
 ## 3.3 Configure API Discovery
 
 In the **API Protection** part enable API Discovery and enable learning fom redirect traffic. Once the configuration is ready, proceed to the DDoS settings.
@@ -409,7 +414,7 @@ The whole safety configuration is done. Take a look at it and click **Save and E
 
 ## 3.6 Verify Application
 
-Now that all the protection is configured, we can verify the application. To do that access the application using the domain name specified in the [HTTP Load Balancer configuration](#22-create-http-load-balancer).
+Now that all the protection is configured, we can verify the application. To do that access the application using the domain name specified in the [Create HTTP Load Balancer](#23-create-http-load-balancer) section.
 
 To verify the WAF protection, try to access the application using a browser or curl command and check if the request is blocked by WAF. Let's simulate a simple XSS attack by adding a script tag to the request. Open the browser console and navigate to the application URL `https://arcadia-dmz.f5-cloud-demo.com?param=<script>alert('XSS')</script>`. You should see the WAF blocking page.
 
@@ -449,11 +454,11 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 ![Configure](./assets/http_discovery.png)
 
-## 4.3 Setup DMZ Configuration
+# 4. Setup DMZ Configuration
 
 Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
 
-To do that go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#22-create-http-load-balancer).
+To do that go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#23-create-http-load-balancer).
 
 ![Second DC](./assets/dc2_manage.png)
 
@@ -477,7 +482,7 @@ Then click **Add Item** to add an origin server.
 
 ![Second DC](./assets/dc2_add_origin.png)
 
-Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.6.11.20** private IP (Your BigIP XC interface in the second DC). Then in the drop-down menu select the [Virtual Site](#42-configure-second-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
+Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.6.11.20** private IP (Your BigIP XC interface in the second DC). Then in the drop-down menu select the second created Virtual Site. Complete the configuration by clicking the **Apply** button.
 
 ![Second DC](./assets/dc2_configure_origin.png)
 

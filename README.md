@@ -27,12 +27,13 @@
   - [3.5 Configure Malicious User and IP Reputation](#35-configure-malicious-user-and-ip-reputation)
   - [3.6 Verify Application](#36-verify-application)
 - [4. Setup DMZ Configuration](#4-setup-dmz-configuration)
+- [5. Conclusion](#5-conclusion)
 
 # Overview
 
-This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup in the XC Cloud environment using the F5 rSeries hardware platform. The setup includes the following components:
+This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 XC Cloud environment and F5 rSeries hardware. The setup includes the following components:
 
-- Configuration of Data Centers with CE Sites for failover;
+- Configuration of Data Centers with CE Sites and F5 rSeries hardware;
 - Demo application deployment in the Data Center;
 - XC Cloud Secure Mesh Site configuration and combining them into a single Virtual Site;
 - Application exposure to the Internet using HTTP Load Balancer;
@@ -41,7 +42,7 @@ This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup
 
 # Setup Diagram
 
-The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides unprecedented level of performance and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual server is configured. Our sample app Arcadia is inside the Virtual Server of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
+The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides unprecedented level of performance and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app Arcadia is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
 
 ![rseris](./assets/rSeries-device.png)
 
@@ -58,8 +59,7 @@ The following components are required to complete the setup:
   - Api Protect
   - Api Discovery
 - F5 rSeries: 5600 / 5800 / 5900/ 10600 / 10800 / 10900 / 12600 / 12800 / 12900
-- Ubuntu VM with access to the F5 rSeries interface
-<!-- - VMware environment with XC Site installed and Ubuntu VM deployed -->
+- Ubuntu VM with access to the F5 rSeries network
 - Domain Name
 
 ## 1.2 Deploy CE Tenant on F5 rSeries
@@ -112,12 +112,12 @@ Navigate to `Tenant Deployments` and click on the `Add` button.
 
 Fill in the required fields:
 
-- `Name`: dc1-dmz
+- `Name`: rseries-dmz-site
 - `Type`: Generic
 - `Image`: select the image you uploaded
 - `IP Address`: IP address of the SLO interface
 - `Gateway`: Gateway IP address
-- `VLANs`: check the `SLO` and `SLI` VLANs
+- `VLANs`: check the `XC-SLO` and `XC-SLI` VLANs
 - `vCPUs`: 4
 - `Virtual Disk Size`: 50 GB
 - `Metadata`: paste the token you copied in the previous step and VLAN ID in the following format: `[primary-vlan:SLO token:your_token_from_xc_cloud]`
@@ -136,6 +136,8 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ## 1.3.1 Deploy Big-IP on F5 rSeries
 
+Download the BigIP image from the [F5 Downloads](https://my.f5.com/manage/s/downloads) for F5OS and save it to your local machine.
+
 In the F5 rSeries interface navigate to `Tenant Images` and click on the `Upload` button.
 
 ![rseries-bigip](./assets/f5os_bigip_tenant_image.png)
@@ -153,9 +155,9 @@ Fill in the required fields:
 - `Name`: big-ip-tmos
 - `Type`: BIG-IP
 - `Image`: select the image you uploaded
-- `IP Address`: 10.192.76.26
+- `IP Address`: IP address of the Bgi-IP management interface
 - `Gateway`: Gateway IP address
-- `VLANs`: check the `SLI` and `BIG-IP` VLANs
+- `VLANs`: check the `XC-SLI` and `BIG-IP` VLANs
 - `vCPUs`: 4
 - `Virtual Disk Size`: 82 GB
 - `State`: Deployed
@@ -168,7 +170,7 @@ Click on the `Save & Close` button to apply the changes.
 
 ## 1.3.2 Configure Big-IP on F5 rSeries
 
-Log in your BIG-IP TMOS instance and navigate to `Network`. Select `VLANs` and click the `Create` button.
+Log in your Big-IP TMOS instance and navigate to `Network`. Select `VLANs` and click the `Create` button.
 
 ![rseries-bigip](./assets/bigip_config_vlan_navigate.png)
 
@@ -183,7 +185,7 @@ Next, proceed to `Self IPs` and click `Create`.
 This will open the configuration form. Fill in the following fields:
 
 - `Name`: 10.5.11.20
-- `IP Address`: 10.5.11.20
+- `IP Address`: 10.5.11.20 (or any other IP address you want to assign in XC SLI network)
 - `Netmask`: 255.255.255.0
 - `VLAN / Tunnel`: select the VLAN you create in the previous step
 
@@ -254,7 +256,7 @@ The application is now exposed to the XC SLI network. You can try to access the 
 
 ## 2.2 Configure XC Virtual Site
 
-In order to expose our application with two Secure Mesh Sites for failover to the internet, we need to combine them using Virtual Site and then add an HTTP Load Balancer. You can see the setup in the diagram below.
+To simplify the management of the application, we will create a Virtual Site in the XC Cloud that will assign the Secure Mesh Site to the Virtual Site. This will allow us to access the application using the Virtual Site name and allow us to scale the application by adding more Secure Mesh Sites in the future.
 
 > > > > TODO: add diagramm
 
@@ -270,7 +272,7 @@ In the opened form give virtual site a name that we specified as [label](#12-cre
 
 ## 2.3 Create HTTP Load Balancer
 
-Next, we will configure HTTP Load Balancer to expose the created Virtual Site connecting two Secure Mesh Sites to the Internet.
+Next, we will configure HTTP Load Balancer to expose the created Virtual Site to the Internet.
 
 Proceed to the **Multi-Cloud App Connect** service => **Load Balancers** => **HTTP Load Balancers**. Click the **Add HTTP Load Balancer** button.
 
@@ -330,7 +332,7 @@ Now that the HTTP Load Balancer is configured, click **Save and Exit** to save i
 
 # 3. Protect Application
 
-Now that we have exposed the Virtual Site with two Secure Mesh Sites to the Internet using an HTTP Load Balancer, we will configure protection for the deployed application: WAF, Bot Protect, API Discovery, DDoS Protection, and Malicious User and IP Reputation.
+Now that we have exposed the Virtual Site to the Internet using an HTTP Load Balancer, we will configure protection for the deployed application: WAF, Bot Protect, API Discovery, DDoS Protection, and Malicious User and IP Reputation.
 
 To do that go back to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the created HTTP Load Balancer.
 
@@ -458,7 +460,9 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
 
-To do that go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#23-create-http-load-balancer).
+This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from the [1. Configure Environment](#1-configure-environment) section to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site) section.
+
+Once the second Data Center is ready, we can proceed with the configuration. Go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#23-create-http-load-balancer).
 
 ![Second DC](./assets/dc2_manage.png)
 
@@ -503,3 +507,9 @@ The second configured origin pool will appear on the list.
 ![Second DC](./assets/dc2_pool_result.png)
 
 Now that we have added and configured the second origin pool of the HTTP Load Balancer for the second Data Center, click **Save and Exit** to save it.
+
+# 5. Conclusion
+
+In this guide, we have configured a comprehensive DMZ setup using F5 rSeries hardware, Big-IP and F5 XC Cloud environment. We have deployed a simple web application, configured the Big-IP and XC CE Tenant on F5 rSeries, exposed the application to the Internet using HTTP Load Balancer, and protected the application with WAF, Bot Protection, API Discovery, DDoS Protection, Malicious User and IP Reputation. We have also configured the second Data Center and added it to the HTTP Load Balancer as a backup origin pool.
+
+This setup provides a secure and scalable environment for the application with advanced protection and performance features. The F5 rSeries hardware and F5 XC Cloud environment provide a powerful platform for deploying and managing applications in a secure and efficient way.

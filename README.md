@@ -11,7 +11,7 @@
   - [1.2 Deploy CE Tenant on F5 rSeries](#12-deploy-ce-tenant-on-f5-rseries)
   - [1.2.1 Create Secure Mesh Site in XC Cloud](#121-create-secure-mesh-site-in-xc-cloud)
   - [1.2.2 Deploy CE Tenant on F5 rSeries](#122-deploy-ce-tenant-on-f5-rseries)
-  - [1.3 Deploy and Confgiure Big-IP on F5 rSeries](#13-deploy-and-confgiure-big-ip-on-f5-rseries)
+  - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
   - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
   - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
   - [1.5 Configure Application VMs](#15-configure-application-vms)
@@ -132,7 +132,7 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
-## 1.3 Deploy and Confgiure Big-IP on F5 rSeries
+## 1.3 Deploy and Configure Big-IP on F5 rSeries
 
 ## 1.3.1 Deploy Big-IP on F5 rSeries
 
@@ -155,7 +155,7 @@ Fill in the required fields:
 - `Name`: big-ip-tmos
 - `Type`: BIG-IP
 - `Image`: select the image you uploaded
-- `IP Address`: IP address of the Bgi-IP management interface
+- `IP Address`: IP address of the Big-IP management interface
 - `Gateway`: Gateway IP address
 - `VLANs`: check the `XC-SLI` and `BIG-IP` VLANs
 - `vCPUs`: 4

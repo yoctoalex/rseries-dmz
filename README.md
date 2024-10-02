@@ -44,7 +44,7 @@ This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup
 
 The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides unprecedented level of performance and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app Arcadia is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
 
-![rseris](./assets/rSeries-device.png)
+![rseris](./assets/diagram-overview.png)
 
 # 1. Configure Environment
 
@@ -61,6 +61,10 @@ The following components are required to complete the setup:
 - F5 rSeries: 5600 / 5800 / 5900/ 10600 / 10800 / 10900 / 12600 / 12800 / 12900
 - Ubuntu VM with access to the F5 rSeries network
 - Domain Name
+
+The following diagram shows the components and network configuration of the setup:
+
+![rseris](./assets/diagram-configure.png)
 
 ## 1.2 Deploy CE Tenant on F5 rSeries
 
@@ -211,6 +215,8 @@ Verify that the application is running by accessing `http://{{your_vm_ip}}:8080`
 
 # 2. Expose Application to the Internet
 
+![rseris](./assets/diagram-httplb.png)
+
 ## 2.1 Create Big-IP Virtual Server
 
 In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
@@ -258,7 +264,7 @@ The application is now exposed to the XC SLI network. You can try to access the 
 
 To simplify the management of the application, we will create a Virtual Site in the XC Cloud that will assign the Secure Mesh Site to the Virtual Site. This will allow us to access the application using the Virtual Site name and allow us to scale the application by adding more Secure Mesh Sites in the future.
 
-> > > > TODO: add diagramm
+![rseris](./assets/diagram-vsite.png)
 
 ![Virtual Site](./assets/virtual_site_dc1.png)
 
@@ -333,6 +339,8 @@ Now that the HTTP Load Balancer is configured, click **Save and Exit** to save i
 # 3. Protect Application
 
 Now that we have exposed the Virtual Site to the Internet using an HTTP Load Balancer, we will configure protection for the deployed application: WAF, Bot Protect, API Discovery, DDoS Protection, and Malicious User and IP Reputation.
+
+![rseris](./assets/diagram-waf.png)
 
 To do that go back to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the created HTTP Load Balancer.
 
@@ -459,6 +467,8 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 # 4. Setup DMZ Configuration
 
 Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
+
+![rseris](./assets/diagram-dmz.png)
 
 This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from the [1. Configure Environment](#1-configure-environment) section to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site) section.
 

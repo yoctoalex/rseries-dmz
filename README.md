@@ -266,8 +266,6 @@ To simplify the management of the application, we will create a Virtual Site in 
 
 ![rseris](./assets/diagram-vsite.png)
 
-![Virtual Site](./assets/virtual_site_dc1.png)
-
 Let's start with adding a virtual site. Back in the F5 Distributed Cloud Console, navigate to the **Shared Configuration** service. From there, select **Virtual Sites** and click the **Add Virtual Site** button.
 
 ![Virtual Site](./assets/virtual_site_add.png)

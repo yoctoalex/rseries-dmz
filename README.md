@@ -8,17 +8,17 @@
 - [Setup Diagram](#setup-diagram)
 - [1. Configure Environment](#1-configure-environment)
   - [1.1 Prerequisites](#11-prerequisites)
-  - [1.2 Deploy CE Tenant on F5 rSeries](#12-deploy-ce-tenant-on-f5-rseries)
-  - [1.2.1 Create Secure Mesh Site in XC Cloud](#121-create-secure-mesh-site-in-xc-cloud)
-  - [1.2.2 Deploy CE Tenant on F5 rSeries](#122-deploy-ce-tenant-on-f5-rseries)
+  - [1.2 Configure Application VMs](#12-configure-application-vms)
   - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
-  - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
-  - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
-  - [1.5 Configure Application VMs](#15-configure-application-vms)
+    - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
+    - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
+  - [1.4 Create Big-IP Virtual Server](#14-create-big-ip-virtual-server)
+  - [1.5 Deploy CE Tenant on F5 rSeries](#15-deploy-ce-tenant-on-f5-rseries)
+    - [1.5.1 Create Secure Mesh Site in XC Cloud](#151-create-secure-mesh-site-in-xc-cloud)
+    - [1.5.2 Deploy CE Tenant on F5 rSeries](#152-deploy-ce-tenant-on-f5-rseries)
 - [2. Expose Application to the Internet](#2-expose-application-to-the-internet)
-  - [2.1 Create Big-IP Virtual Server](#21-create-big-ip-virtual-server)
-  - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
-  - [2.3 Create HTTP Load Balancer](#23-create-http-load-balancer)
+  - [2.1 Configure XC Virtual Site](#21-configure-xc-virtual-site)
+  - [2.1 Create HTTP Load Balancer](#21-create-http-load-balancer)
 - [3. Protect Application](#3-protect-application)
   - [3.1 Configure WAF](#31-configure-waf)
   - [3.2 Configure Bot Protection](#32-configure-bot-protection)
@@ -66,79 +66,25 @@ The following diagram shows the components and network configuration of the setu
 
 ![rseris](./assets/diagram-configure.png)
 
-## 1.2 Deploy CE Tenant on F5 rSeries
+## 1.2 Configure Application VMs
 
-In this section, we will create a Secure Mesh Site in the XC Cloud. We will provide only the basic information required to create the site. The detailed information can be found here: [Deploy Secure Mesh Site v2 on F5 BIG-IP rSeries Appliance (ClickOps)](https://docs.cloud.f5.com/docs-v2/multi-cloud-network-connect/how-to/site-management/deploy-sms-rseries#procedure).
+The main application is a simple web application that simulates a banking application. The application is hosted on an Ubuntu VM. The following steps are required to configure the main application VM:
 
-## 1.2.1 Create Secure Mesh Site in XC Cloud
+- SSH into the VM
+- Install [docker and docker-compose](https://docs.docker.com/engine/install/ubuntu/)
+- Clone the repository
+- Open `./application/main/` folder
+- Run `docker compose up -d`
 
-Open XC Cloud and navigate to the `Multi-Cloud Network Connect`. In the left navigation pane, click on `Site Management` and then click on `Secure Mesh Sites v2`. In the `Secure Mesh Sites v2` page, click on the `Add Secure Mesh Site` button.
+Optionally update the environment variables in the `docker-compose.yml` file.
 
-![rseries-sms](./assets/rseries-xc-navigate.png)
+Verify that the application is running by accessing `http://{{your_vm_ip}}:8080` in the browser or using curl command.
 
-Fill the name of the site and assign custom label `dc == dc1-dmz`.
-
-![rseries-sms](./assets/rseries-xc-name.png)
-
-Select the provider as `F5 rSeries`. Leave other fields as default.
-
-![rseries-sms](./assets/rseries-xc-provider.png)
-
-Click on the `Save and Exit` button to apply the changes.
-
-![rseries-sms](./assets/rseries-xc-save.png)
-
-Open action menu of the created site and click on `Download Image`. Save the image to your local machine, you will need it later.
-
-![rseries-sms](./assets/rseries-xc-image.png)
-
-Open action menu again and click on `Generate Node Token`.
-
-![rseries-sms](./assets/rseries-xc-token.png)
-
-From the `Generate Node Token` dialog, copy the token.
-
-![rseries-sms](./assets/rseries-xc-token-copy.png)
-
-## 1.2.2 Deploy CE Tenant on F5 rSeries
-
-Sign in to the F5 rSeries interface and navigate to the `TENANT MANAGEMENT` tab. Click on the `Tenant Images`. Then click on the `Upload` button.
-
-![rseries-sms](./assets/rseries-tenant.png)
-
-Select the image you downloaded in the previous step and click `Open`.
-
-![rseries-sms](./assets/rseries-upload.png)
-
-Navigate to `Tenant Deployments` and click on the `Add` button.
-
-![rseries-sms](./assets/rseries-create.png)
-
-Fill in the required fields:
-
-- `Name`: rseries-dmz-site
-- `Type`: Generic
-- `Image`: select the image you uploaded
-- `IP Address`: IP address of the SLO interface
-- `Gateway`: Gateway IP address
-- `VLANs`: check the `XC-SLO` and `XC-SLI` VLANs
-- `vCPUs`: 4
-- `Virtual Disk Size`: 50 GB
-- `Metadata`: paste the token you copied in the previous step and VLAN ID in the following format: `[primary-vlan:SLO token:your_token_from_xc_cloud]`
-
-Click on the `Save & Close` button to apply the changes.
-
-![rseries-sms](./assets/rseries-details_part_1.png)
-
-![rseries-sms](./assets/rseries-details_part_2.png)
-
-Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is deployed and provisioned.
-
-![rseries-sms](./assets/rseries-confirm.png)
+![Secure Mesh Site](./assets/vmware_app.png)
 
 ## 1.3 Deploy and Configure Big-IP on F5 rSeries
 
-## 1.3.1 Deploy Big-IP on F5 rSeries
+### 1.3.1 Deploy Big-IP on F5 rSeries
 
 Download the BigIP image from the [F5 Downloads](https://my.f5.com/manage/s/downloads) for F5OS and save it to your local machine.
 
@@ -172,7 +118,7 @@ Click on the `Save & Close` button to apply the changes.
 
 ![rseries-bigip](./assets/f5os_bigip_create_part_2.png)
 
-## 1.3.2 Configure Big-IP on F5 rSeries
+### 1.3.2 Configure Big-IP on F5 rSeries
 
 Log in your Big-IP TMOS instance and navigate to `Network`. Select `VLANs` and click the `Create` button.
 
@@ -197,27 +143,7 @@ Click `Finished` as soon as the fields are filled out.
 
 ![rseries-bigip](./assets/bigip_config_selfip_create.png)
 
-## 1.5 Configure Application VMs
-
-The main application is a simple web application that simulates a banking application. The application is hosted on an Ubuntu VM. The following steps are required to configure the main application VM:
-
-- SSH into the VM
-- Install [docker and docker-compose](https://docs.docker.com/engine/install/ubuntu/)
-- Clone the repository
-- Open `./application/main/` folder
-- Run `docker compose up -d`
-
-Optionally update the environment variables in the `docker-compose.yml` file.
-
-Verify that the application is running by accessing `http://{{your_vm_ip}}:8080` in the browser or using curl command.
-
-![Secure Mesh Site](./assets/vmware_app.png)
-
-# 2. Expose Application to the Internet
-
-![rseris](./assets/diagram-httplb.png)
-
-## 2.1 Create Big-IP Virtual Server
+## 1.4 Create Big-IP Virtual Server
 
 In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
 
@@ -260,7 +186,81 @@ Fill in the required fields:
 
 The application is now exposed to the XC SLI network. You can try to access the application using the IP address of the SLI network.
 
-## 2.2 Configure XC Virtual Site
+## 1.5 Deploy CE Tenant on F5 rSeries
+
+In this section, we will create a Secure Mesh Site in the XC Cloud. We will provide only the basic information required to create the site. The detailed information can be found here: [Deploy Secure Mesh Site v2 on F5 BIG-IP rSeries Appliance (ClickOps)](https://docs.cloud.f5.com/docs-v2/multi-cloud-network-connect/how-to/site-management/deploy-sms-rseries#procedure).
+
+### 1.5.1 Create Secure Mesh Site in XC Cloud
+
+Open XC Cloud and navigate to the `Multi-Cloud Network Connect`. In the left navigation pane, click on `Site Management` and then click on `Secure Mesh Sites v2`. In the `Secure Mesh Sites v2` page, click on the `Add Secure Mesh Site` button.
+
+![rseries-sms](./assets/rseries-xc-navigate.png)
+
+Fill the name of the site and assign custom label `dc == dc1-dmz`.
+
+![rseries-sms](./assets/rseries-xc-name.png)
+
+Select the provider as `F5 rSeries`. Leave other fields as default.
+
+![rseries-sms](./assets/rseries-xc-provider.png)
+
+Click on the `Save and Exit` button to apply the changes.
+
+![rseries-sms](./assets/rseries-xc-save.png)
+
+Open action menu of the created site and click on `Download Image`. Save the image to your local machine, you will need it later.
+
+![rseries-sms](./assets/rseries-xc-image.png)
+
+Open action menu again and click on `Generate Node Token`.
+
+![rseries-sms](./assets/rseries-xc-token.png)
+
+From the `Generate Node Token` dialog, copy the token.
+
+![rseries-sms](./assets/rseries-xc-token-copy.png)
+
+### 1.5.2 Deploy CE Tenant on F5 rSeries
+
+Sign in to the F5 rSeries interface and navigate to the `TENANT MANAGEMENT` tab. Click on the `Tenant Images`. Then click on the `Upload` button.
+
+![rseries-sms](./assets/rseries-tenant.png)
+
+Select the image you downloaded in the previous step and click `Open`.
+
+![rseries-sms](./assets/rseries-upload.png)
+
+Navigate to `Tenant Deployments` and click on the `Add` button.
+
+![rseries-sms](./assets/rseries-create.png)
+
+Fill in the required fields:
+
+- `Name`: rseries-dmz-site
+- `Type`: Generic
+- `Image`: select the image you uploaded
+- `IP Address`: IP address of the SLO interface
+- `Gateway`: Gateway IP address
+- `VLANs`: check the `XC-SLO` and `XC-SLI` VLANs
+- `vCPUs`: 4
+- `Virtual Disk Size`: 50 GB
+- `Metadata`: paste the token you copied in the previous step and VLAN ID in the following format: `[primary-vlan:SLO token:your_token_from_xc_cloud]`
+
+Click on the `Save & Close` button to apply the changes.
+
+![rseries-sms](./assets/rseries-details_part_1.png)
+
+![rseries-sms](./assets/rseries-details_part_2.png)
+
+Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is deployed and provisioned.
+
+![rseries-sms](./assets/rseries-confirm.png)
+
+# 2. Expose Application to the Internet
+
+![rseris](./assets/diagram-httplb.png)
+
+## 2.1 Configure XC Virtual Site
 
 To simplify the management of the application, we will create a Virtual Site in the XC Cloud that will assign the Secure Mesh Site to the Virtual Site. This will allow us to access the application using the Virtual Site name and allow us to scale the application by adding more Secure Mesh Sites in the future.
 
@@ -270,11 +270,11 @@ Let's start with adding a virtual site. Back in the F5 Distributed Cloud Console
 
 ![Virtual Site](./assets/virtual_site_add.png)
 
-In the opened form give virtual site a name that we specified as [label](#12-create-secure-mesh-site-in-xc-cloud) for Secure Mesh Sites. Then make sure to select the **CE** site type. After that add selector expression specifying its name as value and complete by clicking the **Save and Exit** button.
+In the opened form give virtual site a name that we specified as [label](#151-create-secure-mesh-site-in-xc-cloud) for Secure Mesh Sites. Then make sure to select the **CE** site type. After that add selector expression specifying its name as value and complete by clicking the **Save and Exit** button.
 
 ![Virtual Site](./assets/virtual_site_config.png)
 
-## 2.3 Create HTTP Load Balancer
+## 2.1 Create HTTP Load Balancer
 
 Next, we will configure HTTP Load Balancer to expose the created Virtual Site to the Internet.
 
@@ -306,7 +306,7 @@ Then click **Add Item** to add an origin server.
 
 ![HTTP LB](./assets/http_lb_pool_origin.png)
 
-Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.5.11.20** private IP (your BigIP XC interface). Then in the drop-down menu select the [Virtual Site](#21-configure-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
+Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.5.11.20** private IP (your BigIP XC interface). Then in the drop-down menu select the [Virtual Site](#21-configure-xc-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
 
 ![HTTP LB](./assets/http_lb_pool_details.png)
 
@@ -422,7 +422,7 @@ The whole safety configuration is done. Take a look at it and click **Save and E
 
 ## 3.6 Verify Application
 
-Now that all the protection is configured, we can verify the application. To do that access the application using the domain name specified in the [Create HTTP Load Balancer](#23-create-http-load-balancer) section.
+Now that all the protection is configured, we can verify the application. To do that access the application using the domain name specified in the [Create HTTP Load Balancer](#21-create-http-load-balancer) section.
 
 To verify the WAF protection, try to access the application using a browser or curl command and check if the request is blocked by WAF. Let's simulate a simple XSS attack by adding a script tag to the request. Open the browser console and navigate to the application URL `https://arcadia-dmz.f5-cloud-demo.com?param=<script>alert('XSS')</script>`. You should see the WAF blocking page.
 
@@ -468,9 +468,9 @@ Finally, we will configure HTTP Load Balancer by creating the second origin pool
 
 ![rseris](./assets/diagram-dmz.png)
 
-This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from the [1. Configure Environment](#1-configure-environment) section to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site) section.
+This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from the [1. Configure Environment](#1-configure-environment) section to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.1 Configure XC Virtual Site](#21-configure-xc-virtual-site) section.
 
-Once the second Data Center is ready, we can proceed with the configuration. Go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#23-create-http-load-balancer).
+Once the second Data Center is ready, we can proceed with the configuration. Go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#21-create-http-load-balancer).
 
 ![Second DC](./assets/dc2_manage.png)
 

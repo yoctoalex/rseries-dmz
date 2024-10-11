@@ -6,28 +6,29 @@
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Setup Diagram](#setup-diagram)
-- [1. Configure Environment](#1-configure-environment)
-  - [1.1 Prerequisites](#11-prerequisites)
+- [1. Initial preparations](#1-initial-preparations)
+  - [1.1 Requirements](#11-requirements)
   - [1.2 Configure Application VMs](#12-configure-application-vms)
   - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
     - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
     - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
   - [1.4 Create Big-IP Virtual Server](#14-create-big-ip-virtual-server)
-  - [1.5 Deploy CE Tenant on F5 rSeries](#15-deploy-ce-tenant-on-f5-rseries)
-    - [1.5.1 Create Secure Mesh Site in XC Cloud](#151-create-secure-mesh-site-in-xc-cloud)
-    - [1.5.2 Deploy CE Tenant on F5 rSeries](#152-deploy-ce-tenant-on-f5-rseries)
-- [2. Expose Application to the Internet](#2-expose-application-to-the-internet)
-  - [2.1 Configure XC Virtual Site](#21-configure-xc-virtual-site)
-  - [2.1 Create HTTP Load Balancer](#21-create-http-load-balancer)
-- [3. Protect Application](#3-protect-application)
-  - [3.1 Configure WAF](#31-configure-waf)
-  - [3.2 Configure Bot Protection](#32-configure-bot-protection)
-  - [3.3 Configure API Discovery](#33-configure-api-discovery)
-  - [3.4 Configure DDoS Protection](#34-configure-ddos-protection)
-  - [3.5 Configure Malicious User and IP Reputation](#35-configure-malicious-user-and-ip-reputation)
-  - [3.6 Verify Application](#36-verify-application)
-- [4. Setup DMZ Configuration](#4-setup-dmz-configuration)
-- [5. Conclusion](#5-conclusion)
+- [2. Configure Environment](#2-configure-environment)
+  - [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries)
+    - [2.1.1 Create Secure Mesh Site in XC Cloud](#211-create-secure-mesh-site-in-xc-cloud)
+    - [2.1.2 Deploy CE Tenant on F5 rSeries](#212-deploy-ce-tenant-on-f5-rseries)
+  - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
+- [3. Expose Application to the Internet](#3-expose-application-to-the-internet)
+  - [3.1 Create HTTP Load Balancer](#31-create-http-load-balancer)
+- [4. Protect Application](#4-protect-application)
+  - [4.1 Configure WAF](#41-configure-waf)
+  - [4.2 Configure Bot Protection](#42-configure-bot-protection)
+  - [4.3 Configure API Discovery](#43-configure-api-discovery)
+  - [4.4 Configure DDoS Protection](#44-configure-ddos-protection)
+  - [4.5 Configure Malicious User and IP Reputation](#45-configure-malicious-user-and-ip-reputation)
+  - [4.6 Verify Application](#46-verify-application)
+- [5. Setup DMZ Configuration](#5-setup-dmz-configuration)
+- [6. Conclusion](#6-conclusion)
 
 # Overview
 
@@ -46,9 +47,9 @@ The objective of this setup is to create a secure DMZ environment for the applic
 
 ![rseris](./assets/diagram-overview.png)
 
-# 1. Configure Environment
+# 1. Initial preparations
 
-## 1.1 Prerequisites
+## 1.1 Requirements
 
 The following components are required to complete the setup:
 
@@ -186,11 +187,13 @@ Fill in the required fields:
 
 The application is now exposed to the XC SLI network. You can try to access the application using the IP address of the SLI network.
 
-## 1.5 Deploy CE Tenant on F5 rSeries
+# 2. Configure Environment
+
+## 2.1 Deploy CE Tenant on F5 rSeries
 
 In this section, we will create a Secure Mesh Site in the XC Cloud. We will provide only the basic information required to create the site. The detailed information can be found here: [Deploy Secure Mesh Site v2 on F5 BIG-IP rSeries Appliance (ClickOps)](https://docs.cloud.f5.com/docs-v2/multi-cloud-network-connect/how-to/site-management/deploy-sms-rseries#procedure).
 
-### 1.5.1 Create Secure Mesh Site in XC Cloud
+### 2.1.1 Create Secure Mesh Site in XC Cloud
 
 Open XC Cloud and navigate to the `Multi-Cloud Network Connect`. In the left navigation pane, click on `Site Management` and then click on `Secure Mesh Sites v2`. In the `Secure Mesh Sites v2` page, click on the `Add Secure Mesh Site` button.
 
@@ -220,7 +223,7 @@ From the `Generate Node Token` dialog, copy the token.
 
 ![rseries-sms](./assets/rseries-xc-token-copy.png)
 
-### 1.5.2 Deploy CE Tenant on F5 rSeries
+### 2.1.2 Deploy CE Tenant on F5 rSeries
 
 Sign in to the F5 rSeries interface and navigate to the `TENANT MANAGEMENT` tab. Click on the `Tenant Images`. Then click on the `Upload` button.
 
@@ -256,11 +259,7 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
-# 2. Expose Application to the Internet
-
-![rseris](./assets/diagram-httplb.png)
-
-## 2.1 Configure XC Virtual Site
+## 2.2 Configure XC Virtual Site
 
 To simplify the management of the application, we will create a Virtual Site in the XC Cloud that will assign the Secure Mesh Site to the Virtual Site. This will allow us to access the application using the Virtual Site name and allow us to scale the application by adding more Secure Mesh Sites in the future.
 
@@ -274,7 +273,13 @@ In the opened form give virtual site a name that we specified as [label](#151-cr
 
 ![Virtual Site](./assets/virtual_site_config.png)
 
-## 2.1 Create HTTP Load Balancer
+
+# 3. Expose Application to the Internet
+
+![rseris](./assets/diagram-httplb.png)
+
+
+## 3.1 Create HTTP Load Balancer
 
 Next, we will configure HTTP Load Balancer to expose the created Virtual Site to the Internet.
 
@@ -334,7 +339,7 @@ Now that the HTTP Load Balancer is configured, click **Save and Exit** to save i
 
 ![HTTP LB](./assets/http_lb_save.png)
 
-# 3. Protect Application
+# 4. Protect Application
 
 Now that we have exposed the Virtual Site to the Internet using an HTTP Load Balancer, we will configure protection for the deployed application: WAF, Bot Protect, API Discovery, DDoS Protection, and Malicious User and IP Reputation.
 
@@ -348,7 +353,7 @@ Click the **Edit Configuration** button to enable the editing mode.
 
 ![Configure](./assets/configure_edit.png)
 
-## 3.1 Configure WAF
+## 4.1 Configure WAF
 
 First, let's configure WAF protection. Scroll down to the **Web Application Firewall** section and enable WAF. Open the dropdown menu and click **Add Item**.
 
@@ -370,7 +375,7 @@ Finally, let's configure **Blocking Response Page** in **Advanced configuration*
 
 ![Configure](./assets/configure_waf_advanced.png)
 
-## 3.2 Configure Bot Protection
+## 4.2 Configure Bot Protection
 
 Next, we will configure Bot Protection. Scroll to the **Bot Protection** section and select **Enable Bot Defense Standard** in the drop-down menu. Move on by clicking **Configure**.
 
@@ -398,19 +403,19 @@ You will see Bot Defense Policy settings. Click the **Apply** button to proceed.
 
 Now that the Bot Protection is configured for the HTTP Load Balancer, we can move on to API Discovery.
 
-## 3.3 Configure API Discovery
+## 4.3 Configure API Discovery
 
 In the **API Protection** part enable API Discovery and enable learning fom redirect traffic. Once the configuration is ready, proceed to the DDoS settings.
 
 ![Configure](./assets/configure_api.png)
 
-## 3.4 Configure DDoS Protection
+## 4.4 Configure DDoS Protection
 
 Go to the **DoS Protection** section and select serving JavaScript challenge to suspicious sources. Proceed and select **Custom** for Slow DDoS Mitigation.
 
 ![Configure](./assets/configure_ddos.png)
 
-## 3.5 Configure Malicious User and IP Reputation
+## 4.5 Configure Malicious User and IP Reputation
 
 In the **Common Security Controls** section enable IP Reputation service and Malicious User Detection. Then select **JavaScript Challenge** for this HTTP LB.
 
@@ -420,7 +425,7 @@ The whole safety configuration is done. Take a look at it and click **Save and E
 
 ![Configure](./assets/configure_save.png)
 
-## 3.6 Verify Application
+## 4.6 Verify Application
 
 Now that all the protection is configured, we can verify the application. To do that access the application using the domain name specified in the [Create HTTP Load Balancer](#21-create-http-load-balancer) section.
 
@@ -462,7 +467,7 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 ![Configure](./assets/http_discovery.png)
 
-# 4. Setup DMZ Configuration
+# 5. Setup DMZ Configuration
 
 Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
 
@@ -516,7 +521,7 @@ The second configured origin pool will appear on the list.
 
 Now that we have added and configured the second origin pool of the HTTP Load Balancer for the second Data Center, click **Save and Exit** to save it.
 
-# 5. Conclusion
+# 6. Conclusion
 
 In this guide, we have configured a comprehensive DMZ setup using F5 rSeries hardware, Big-IP and F5 XC Cloud environment. We have deployed a simple web application, configured the Big-IP and XC CE Tenant on F5 rSeries, exposed the application to the Internet using HTTP Load Balancer, and protected the application with WAF, Bot Protection, API Discovery, DDoS Protection, Malicious User and IP Reputation. We have also configured the second Data Center and added it to the HTTP Load Balancer as a backup origin pool.
 

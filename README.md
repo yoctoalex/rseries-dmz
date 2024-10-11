@@ -12,11 +12,12 @@
   - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
     - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
     - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
-  - [1.4 Create Big-IP Virtual Server](#14-create-big-ip-virtual-server)
+  - [1.3.3 Create Big-IP Virtual Server](#133-create-big-ip-virtual-server)
 - [2. Configure Environment](#2-configure-environment)
   - [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries)
     - [2.1.1 Create Secure Mesh Site in XC Cloud](#211-create-secure-mesh-site-in-xc-cloud)
     - [2.1.2 Deploy CE Tenant on F5 rSeries](#212-deploy-ce-tenant-on-f5-rseries)
+    - [2.1.2 Confgure Second rSeries device](#212-confgure-second-rseries-device)
   - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
 - [3. Expose Application to the Internet](#3-expose-application-to-the-internet)
   - [3.1 Create HTTP Load Balancer](#31-create-http-load-balancer)
@@ -144,7 +145,7 @@ Click `Finished` as soon as the fields are filled out.
 
 ![rseries-bigip](./assets/bigip_config_selfip_create.png)
 
-## 1.4 Create Big-IP Virtual Server
+## 1.3.3 Create Big-IP Virtual Server
 
 In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
 
@@ -259,6 +260,10 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
+### 2.1.2 Confgure Second rSeries device
+
+Repeat the steps from the [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries) section and from the [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries) section to configure the second rSeries device.
+
 ## 2.2 Configure XC Virtual Site
 
 To simplify the management of the application, we will create a Virtual Site in the XC Cloud that will assign the Secure Mesh Site to the Virtual Site. This will allow us to access the application using the Virtual Site name and allow us to scale the application by adding more Secure Mesh Sites in the future.
@@ -272,7 +277,6 @@ Let's start with adding a virtual site. Back in the F5 Distributed Cloud Console
 In the opened form give virtual site a name that we specified as [label](#151-create-secure-mesh-site-in-xc-cloud) for Secure Mesh Sites. Then make sure to select the **CE** site type. After that add selector expression specifying its name as value and complete by clicking the **Save and Exit** button.
 
 ![Virtual Site](./assets/virtual_site_config.png)
-
 
 # 3. Expose Application to the Internet
 
@@ -314,6 +318,8 @@ Then click **Add Item** to add an origin server.
 Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.5.11.20** private IP (your BigIP XC interface). Then in the drop-down menu select the [Virtual Site](#21-configure-xc-virtual-site) we created earlier. Complete the configuration by clicking the **Apply** button.
 
 ![HTTP LB](./assets/http_lb_pool_details.png)
+
+Configure the second origin server for the second BigIP instance in the same way. The IP address is **10.5.11.21**
 
 Type in the **8080** origin server port.
 
@@ -473,7 +479,7 @@ Finally, we will configure HTTP Load Balancer by creating the second origin pool
 
 ![rseris](./assets/diagram-dmz.png)
 
-This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from the [1. Configure Environment](#1-configure-environment) section to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.1 Configure XC Virtual Site](#21-configure-xc-virtual-site) section.
+This setup requires a second Data Center with the same configuration as the first one. Repeat the steps from [1. Initial preparations](#1-initial-preparations) and [2. Configure Environment](#2-configure-environment) sections to create a second Data Center with the same components. Then create a Virtual Site for the second Data Center as described in the [2.1 Configure XC Virtual Site](#21-configure-xc-virtual-site) section.
 
 Once the second Data Center is ready, we can proceed with the configuration. Go to the F5 Distributed Cloud Console and select **Manage Configuration** in the service menu of the earlier [created HTTP Load Balancer](#21-create-http-load-balancer).
 
@@ -502,6 +508,8 @@ Then click **Add Item** to add an origin server.
 Select **IP address of Origin Server on given Sites** as Origin Server type and type in the **10.6.11.20** private IP (Your BigIP XC interface in the second DC). Then in the drop-down menu select the second created Virtual Site. Complete the configuration by clicking the **Apply** button.
 
 ![Second DC](./assets/dc2_configure_origin.png)
+
+Create a second origin server for the second BigIP instance. In our case, the IP address is ** **10.6.11.21**
 
 Type in the **8080** origin server port.
 

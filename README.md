@@ -1,8 +1,8 @@
-# F5 rSeries DMZ Setup
+# F5 CE on rSeries App DMZ Setup
 
 # Table of Contents
 
-- [F5 rSeries DMZ Setup](#f5-rseries-dmz-setup)
+- [F5 CE on rSeries App DMZ Setup](#f5-ce-on-rseries-app-dmz-setup)
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Setup Diagram](#setup-diagram)
@@ -12,7 +12,7 @@
   - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
     - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
     - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
-  - [1.3.3 Create Big-IP Virtual Server](#133-create-big-ip-virtual-server)
+    - [1.3.3 Create Big-IP Virtual Server](#133-create-big-ip-virtual-server)
 - [2. Configure Environment](#2-configure-environment)
   - [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries)
     - [2.1.1 Create Secure Mesh Site in XC Cloud](#211-create-secure-mesh-site-in-xc-cloud)
@@ -145,7 +145,7 @@ Click `Finished` as soon as the fields are filled out.
 
 ![rseries-bigip](./assets/bigip_config_selfip_create.png)
 
-## 1.3.3 Create Big-IP Virtual Server
+### 1.3.3 Create Big-IP Virtual Server
 
 In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
 

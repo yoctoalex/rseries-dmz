@@ -1,4 +1,4 @@
-# F5 CE on rSeries App DMZ Setup
+# Extending App DMZ to Network Edge with F5 rSeries and Distributed Cloud Services
 
 # Table of Contents
 
@@ -9,15 +9,15 @@
 - [1. Initial preparations](#1-initial-preparations)
   - [1.1 Requirements](#11-requirements)
   - [1.2 Configure Application VMs](#12-configure-application-vms)
-  - [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
-    - [1.3.1 Deploy Big-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
-    - [1.3.2 Configure Big-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
-    - [1.3.3 Create Big-IP Virtual Server](#133-create-big-ip-virtual-server)
+  - [1.3 Deploy and Configure BIG-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries)
+    - [1.3.1 Deploy BIG-IP on F5 rSeries](#131-deploy-big-ip-on-f5-rseries)
+    - [1.3.2 Configure BIG-IP on F5 rSeries](#132-configure-big-ip-on-f5-rseries)
+    - [1.3.3 Create BIG-IP Virtual Server](#133-create-big-ip-virtual-server)
 - [2. Configure Environment](#2-configure-environment)
   - [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries)
     - [2.1.1 Create Secure Mesh Site in XC Cloud](#211-create-secure-mesh-site-in-xc-cloud)
     - [2.1.2 Deploy CE Tenant on F5 rSeries](#212-deploy-ce-tenant-on-f5-rseries)
-    - [2.1.2 Confgure Second rSeries device](#212-confgure-second-rseries-device)
+    - [2.1.2 Configure Second rSeries device](#212-confgure-second-rseries-device)
   - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
 - [3. Expose Application to the Internet](#3-expose-application-to-the-internet)
   - [3.1 Create HTTP Load Balancer](#31-create-http-load-balancer)
@@ -33,9 +33,16 @@
 
 # Overview
 
-This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 XC Cloud environment and F5 rSeries hardware. The setup includes the following components:
+This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries hardware. The primary benefits of this configuration are:
 
-- Configuration of Data Centers with CE Sites and F5 rSeries hardware;
+- Ease of securely exposing applications to the public internet by simplifying or eliminating manual handling of routing and other networking tasks
+- Simplifying workflows for pushing out App DMZ towards the network edge
+- Moving relevant security services to the network edge (DDoS, Bot Protection, etc.)
+
+The setup includes the following components:
+
+- Configuration of BIG-IP on F5 rSeries;
+- Configuration of Data Centers with Customer Edge (CE) Sites on F5 rSeries;
 - Demo application deployment in the Data Center;
 - XC Cloud Secure Mesh Site configuration and combining them into a single Virtual Site;
 - Application exposure to the Internet using HTTP Load Balancer;
@@ -44,7 +51,7 @@ This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup
 
 # Setup Diagram
 
-The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides unprecedented level of performance and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app Arcadia is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
+The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides modern topology for flexible and scalable networking connectivity, enhanced performance, and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app (Arcadia) is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
 
 ![rseris](./assets/diagram-overview.png)
 
@@ -84,9 +91,9 @@ Verify that the application is running by accessing `http://{{your_vm_ip}}:8080`
 
 ![Secure Mesh Site](./assets/vmware_app.png)
 
-## 1.3 Deploy and Configure Big-IP on F5 rSeries
+## 1.3 Deploy and Configure BIG-IP on F5 rSeries
 
-### 1.3.1 Deploy Big-IP on F5 rSeries
+### 1.3.1 Deploy BIG-IP on F5 rSeries
 
 Download the BigIP image from the [F5 Downloads](https://my.f5.com/manage/s/downloads) for F5OS and save it to your local machine.
 
@@ -94,7 +101,7 @@ In the F5 rSeries interface navigate to `Tenant Images` and click on the `Upload
 
 ![rseries-bigip](./assets/f5os_bigip_tenant_image.png)
 
-Select the Big-IP image and click `Open`.
+Select the BIG-IP image and click `Open`.
 
 ![rseries-bigip](./assets/f5os_bigip_tenant_image_upload.png)
 
@@ -107,7 +114,7 @@ Fill in the required fields:
 - `Name`: big-ip-tmos
 - `Type`: BIG-IP
 - `Image`: select the image you uploaded
-- `IP Address`: IP address of the Big-IP management interface
+- `IP Address`: IP address of the BIG-IP management interface
 - `Gateway`: Gateway IP address
 - `VLANs`: check the `XC-SLI` and `BIG-IP` VLANs
 - `vCPUs`: 4
@@ -120,9 +127,9 @@ Click on the `Save & Close` button to apply the changes.
 
 ![rseries-bigip](./assets/f5os_bigip_create_part_2.png)
 
-### 1.3.2 Configure Big-IP on F5 rSeries
+### 1.3.2 Configure BIG-IP on F5 rSeries
 
-Log in your Big-IP TMOS instance and navigate to `Network`. Select `VLANs` and click the `Create` button.
+Log in your BIG-IP TMOS instance and navigate to `Network`. Select `VLANs` and click the `Create` button.
 
 ![rseries-bigip](./assets/bigip_config_vlan_navigate.png)
 
@@ -145,11 +152,11 @@ Click `Finished` as soon as the fields are filled out.
 
 ![rseries-bigip](./assets/bigip_config_selfip_create.png)
 
-### 1.3.3 Create Big-IP Virtual Server
+### 1.3.3 Create BIG-IP Virtual Server
 
-In this section, we will configure the Big-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
+In this section, we will configure the BIG-IP Virtual Server to expose the application to the XC SLI network. We will create a pool with the application VM as a member and then create a Virtual Server to route the traffic to the pool.
 
-Open the Big-IP interface and navigate to the `Local Traffic` tab. Click on the `Pools` and then click on the `Create` button.
+Open the BIG-IP interface and navigate to the `Local Traffic` tab. Click on the `Pools` and then click on the `Create` button.
 
 ![bigip](./assets/bigip_pool_create.png)
 
@@ -212,11 +219,11 @@ Click on the `Save and Exit` button to apply the changes.
 
 ![rseries-sms](./assets/rseries-xc-save.png)
 
-Open action menu of the created site and click on `Download Image`. Save the image to your local machine, you will need it later.
+Open the action menu of the created site and click on `Download Image`. Save the image to your local machine, you will need it later.
 
 ![rseries-sms](./assets/rseries-xc-image.png)
 
-Open action menu again and click on `Generate Node Token`.
+Open the action menu again and click on `Generate Node Token`.
 
 ![rseries-sms](./assets/rseries-xc-token.png)
 
@@ -260,9 +267,9 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
-### 2.1.2 Confgure Second rSeries device
+### 2.1.2 Configure Second rSeries device
 
-Repeat the steps from the [1.3 Deploy and Configure Big-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries) section and from the [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries) section to configure the second rSeries device.
+Repeat the steps from the [1.3 Deploy and Configure BIG-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries) section and from the [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries) section to configure the second rSeries device.
 
 ## 2.2 Configure XC Virtual Site
 
@@ -283,15 +290,15 @@ In the opened form give virtual site a name that we specified as [label](#151-cr
 ![rseris](./assets/diagram-httplb.png)
 
 
-## 3.1 Create HTTP Load Balancer
+## 3.1 Create the HTTP Load Balancer
 
-Next, we will configure HTTP Load Balancer to expose the created Virtual Site to the Internet.
+Next, we will configure the HTTP Load Balancer to expose the created Virtual Site to the Internet.
 
 Proceed to the **Multi-Cloud App Connect** service => **Load Balancers** => **HTTP Load Balancers**. Click the **Add HTTP Load Balancer** button.
 
 ![HTTP LB](./assets/http_lb_create.png)
 
-First, give HTTP Load Balancer a name.
+First, give the HTTP Load Balancer a name.
 
 ![HTTP LB](./assets/http_lb_name.png)
 
@@ -307,7 +314,7 @@ Open the **Origin Pool** drop-down menu and click **Add Item** to add an origin 
 
 ![HTTP LB](./assets/http_lb_add_pool.png)
 
-Give origin pool a name.
+Give the origin pool a name.
 
 ![HTTP LB](./assets/http_lb_pool_name.png)
 
@@ -395,7 +402,7 @@ Click the **Add Item** button which will open the creation form.
 
 ![Configure](./assets/configure_bot_add_endpoint.png)
 
-Let's configure the endpoint. First, give it a name. Then select HTTP methods and choose specifying endpoint label category. Specify **Authentication** as flow label category and select **Login** for flow label. Move on and specify path prefix - **/trading/auth**. Select **Block** for the Bot Mitigation action and save the configuration by clicking **Apply**.
+Let's configure the endpoint. First, give it a name. Then select HTTP methods and choose to specify the endpoint label category. Specify **Authentication** as flow label category and select **Login** for flow label. Move on and specify path prefix - **/trading/auth**. Select **Block** for the Bot Mitigation action and save the configuration by clicking **Apply**.
 
 ![Configure](./assets/configure_bot_endpoint_config.png)
 
@@ -475,7 +482,7 @@ Navigate to the **Applications** tab and select your HTTP Load Balancer. Then cl
 
 # 5. Setup DMZ Configuration
 
-Finally, we will configure HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
+Finally, we will configure the HTTP Load Balancer by creating the second origin pool for the second Data Center and configuring it.
 
 ![rseris](./assets/diagram-dmz.png)
 
@@ -497,7 +504,7 @@ Open the **Origin Pool** drop-down menu and click **Add Item** to add an origin 
 
 ![Second DC](./assets/dc2_create_pool.png)
 
-Give origin pool a name.
+Give the origin pool a name.
 
 ![Second DC](./assets/dc2_pool_name.png)
 
@@ -531,6 +538,6 @@ Now that we have added and configured the second origin pool of the HTTP Load Ba
 
 # 6. Conclusion
 
-In this guide, we have configured a comprehensive DMZ setup using F5 rSeries hardware, Big-IP and F5 XC Cloud environment. We have deployed a simple web application, configured the Big-IP and XC CE Tenant on F5 rSeries, exposed the application to the Internet using HTTP Load Balancer, and protected the application with WAF, Bot Protection, API Discovery, DDoS Protection, Malicious User and IP Reputation. We have also configured the second Data Center and added it to the HTTP Load Balancer as a backup origin pool.
+In this guide, we have configured a comprehensive DMZ setup using F5 rSeries hardware, BIG-IP and F5 XC Cloud environment. We have deployed a simple web application, configured the BIG-IP and XC CE Tenant on F5 rSeries, exposed the application to the Internet using HTTP Load Balancer, and protected the application with WAF, Bot Protection, API Discovery, DDoS Protection, Malicious User, and IP Reputation. We have also configured the second Data Center and added it to the HTTP Load Balancer as a backup origin pool.
 
-This setup provides a secure and scalable environment for the application with advanced protection and performance features. The F5 rSeries hardware and F5 XC Cloud environment provide a powerful platform for deploying and managing applications in a secure and efficient way.
+This setup provides a secure and scalable environment for exposing on-prem applications to the public internet access with advanced protection and networking management performed at the network edge with the help of F5 Distributed Cloud Services. The F5 rSeries hardware and F5 XC Cloud environment provide a powerful platform for deploying and managing networking and security of applications in a scalable and efficient way.

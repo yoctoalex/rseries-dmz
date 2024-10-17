@@ -42,7 +42,7 @@ The challenges this configuration addresses are:
 
 The primary benefits of this configuration are:
 
-(1) Global Services Tier 
+(1) **Global Services Tier** 
 - Keeps unwanted traffic off your infrastructure
 - Broad spectrum volumetric DDoS mitigation (L3/L)
 - Anti-abuse including bot/fraud detection and mitigation
@@ -50,12 +50,12 @@ The primary benefits of this configuration are:
 - Simplifying workflows for pushing out App DMZ toward the network edge
 - Standard company app security policy / policies used by all apps
 
-(2) App Services Tier 
+(2) **App Services Tier**
 - Retains important / integrated security controls and policy including automation and CI/CD pipelines at your app
 - Workload-specific security policy definitions & enforcement
 - Closest to the application & Line of Business / security teams managing specific app services
 
-![rseris](./assets/diagram-overview2.png)
+![rseris](./assets/diagram-overview-2.png)
 
 # Setup 
 

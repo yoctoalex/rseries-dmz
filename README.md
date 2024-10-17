@@ -33,13 +33,35 @@
 
 # Overview
 
-This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries hardware. The primary benefits of this configuration are:
+This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries hardware.
 
+The challenges this configuration addresses are:
+- Management and "stitching" of multiple app environments at scale
+- Complex coordination of security policy across application environments
+- Handling unwanted traffic (bad actors and bots) at the app services level / on-prem infrastructure
+
+The primary benefits of this configuration are:
+
+(1) Global Services Tier 
+- Keeps unwanted traffic off your infrastructure
+- Broad spectrum volumetric DDoS mitigation (L3/L)
+- Anti-abuse including bot/fraud detection and mitigation
 - Ease of securely exposing applications to the public internet by simplifying or eliminating manual handling of routing and other networking tasks
-- Simplifying workflows for pushing out App DMZ towards the network edge
-- Moving relevant security services to the network edge (DDoS, Bot Protection, etc.)
+- Simplifying workflows for pushing out App DMZ toward the network edge
+- Standard company app security policy / policies used by all apps
 
-The setup includes the following components:
+(2) App Services Tier 
+- Retains important / integrated security controls and policy including automation and CI/CD pipelines at your app
+- Workload-specific security policy definitions & enforcement
+- Closest to the application & Line of Business / security teams managing specific app services
+
+![rseris](./assets/diagram-overview2.png)
+
+# Setup 
+
+The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides modern topology for flexible and scalable networking connectivity, enhanced performance, and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app (Arcadia) is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
+
+The setup flow includes the following:
 
 - Configuration of BIG-IP on F5 rSeries;
 - Configuration of Data Centers with Customer Edge (CE) Sites on F5 rSeries;
@@ -48,13 +70,7 @@ The setup includes the following components:
 - Application exposure to the Internet using HTTP Load Balancer;
 - Application protection with Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery;
 - Upgrading the solution with a second Data Center and configuring HTTP Load Balancer for a complete DMZ configuration.
-
-# Setup Diagram
-
-The objective of this setup is to create a secure DMZ environment for the application using the F5 rSeries hardware platform that provides modern topology for flexible and scalable networking connectivity, enhanced performance, and protection. The diagram below shows high-level components and their interactions. The setup includes two Data Centers, each has an origin pool that connects to the XC site installed in F5 rSeries. The XC site is connected to the BIG-IP where a Virtual Server is configured. Our sample app (Arcadia) is inside the Virtual Server Pool of the BIG-IP. The application is protected by Web Application Firewall (WAF), DDoS Protection, Bot Protection, and API Discovery.
-
-![rseris](./assets/diagram-overview.png)
-
+  
 # 1. Initial preparations
 
 ## 1.1 Requirements

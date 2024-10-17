@@ -35,7 +35,7 @@
 
 This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries hardware.
 
-The challenges this configuration addresses are:
+The configuration covered in this guide addresses the following challenges:
 - Management and "stitching" of multiple app environments at scale
 - Complex coordination of security policy across application environments
 - Handling unwanted traffic (bad actors and bots) at the app services level / on-prem infrastructure

@@ -1,4 +1,4 @@
-# Extending App DMZ to Network Edge with F5 rSeries and Distributed Cloud Services
+# Extending App DMZ to Global Service Tier with F5 rSeries and Distributed Cloud Services
 
 # Table of Contents
 

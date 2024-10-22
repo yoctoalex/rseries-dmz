@@ -2,10 +2,10 @@
 
 # Table of Contents
 
-- [F5 CE on rSeries App DMZ Setup](#f5-ce-on-rseries-app-dmz-setup)
+- [Extending App DMZ to Global Service Tier with F5 rSeries and Distributed Cloud Services](#extending-app-dmz-to-global-service-tier-with-f5-rseries-and-distributed-cloud-services)
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
-- [Setup Diagram](#setup-diagram)
+- [Setup](#setup)
 - [1. Initial preparations](#1-initial-preparations)
   - [1.1 Requirements](#11-requirements)
   - [1.2 Configure Application VMs](#12-configure-application-vms)
@@ -17,10 +17,10 @@
   - [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries)
     - [2.1.1 Create Secure Mesh Site in XC Cloud](#211-create-secure-mesh-site-in-xc-cloud)
     - [2.1.2 Deploy CE Tenant on F5 rSeries](#212-deploy-ce-tenant-on-f5-rseries)
-    - [2.1.2 Configure Second rSeries device](#212-confgure-second-rseries-device)
+    - [2.1.2 Configure Second rSeries device](#212-configure-second-rseries-device)
   - [2.2 Configure XC Virtual Site](#22-configure-xc-virtual-site)
 - [3. Expose Application to the Internet](#3-expose-application-to-the-internet)
-  - [3.1 Create HTTP Load Balancer](#31-create-http-load-balancer)
+  - [3.1 Create the HTTP Load Balancer](#31-create-the-http-load-balancer)
 - [4. Protect Application](#4-protect-application)
   - [4.1 Configure WAF](#41-configure-waf)
   - [4.2 Configure Bot Protection](#42-configure-bot-protection)
@@ -303,12 +303,14 @@ In the opened form give virtual site a name that we specified as [label](#151-cr
 
 # 3. Expose Application to the Internet
 
-![rseris](./assets/diagram-httplb.png)
+![rseris](./assets/diagram-before.png)
 
 
 ## 3.1 Create the HTTP Load Balancer
 
 Next, we will configure the HTTP Load Balancer to expose the created Virtual Site to the Internet.
+
+![rseris](./assets/diagram-httplb.png)
 
 Proceed to the **Multi-Cloud App Connect** service => **Load Balancers** => **HTTP Load Balancers**. Click the **Add HTTP Load Balancer** button.
 

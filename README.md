@@ -52,7 +52,7 @@ Handling these operations at the App Services tier and on a per-application basi
 - Standardized consistent policy across overall data center deployments
 - Handling unwanted traffic (bad actors and bots) at the global services tier
 
-These challenges compound into serious problems when considering modern microservices app architectures, in particular handling unwanted/unfiltered traffic to app services and API endpoints, and having no uniform security or visibility when managing multiple sites (multiple datacenters and/or clouds). 
+These challenges compound into serious problems when considering modern microservices app architectures, in particular **handling unwanted/unfiltered traffic** to app services and API endpoints, and **having no uniform security or visibility** when managing multiple sites (multiple datacenters and/or clouds). 
 
 **Solution** 
 

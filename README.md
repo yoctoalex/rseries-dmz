@@ -33,14 +33,30 @@
 
 # Overview
 
-This guide provides the steps for a comprehensive demilitarized zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries hardware.
+This guide provides the steps for a comprehensive Demilitarized Zone (DMZ) setup using F5 Distributed Cloud Services (XC) environment and F5 rSeries appliance.
 
-The configuration covered in this guide addresses the following challenges:
-- Management and "stitching" of multiple app environments at scale
-- Complex coordination of security policy across application environments
-- Handling unwanted traffic (bad actors and bots) at the app services level / on-prem infrastructure
+**Challenges**
 
-The primary benefits of this configuration are:
+DMZ is a physical or logical subnetwork that contains and exposes an organization's external-facing services to an untrusted network, typically the internet. It serves as a buffer zone between the secure internal network and external networks, providing an additional layer of security to ensure that potentially malicious traffic does not reach critical internal systems directly.
+
+To make data center applications accessible on the internet, IT teams traditionally handle several networking operations, including:
+* **NAT** (Network Address Translation): Converting public IP addresses to private server IPs.
+* **DNS Resolution**: Ensuring domain names resolve to the correct IP addresses.
+* **Load Balancing**: Distributes incoming application traffic across multiple servers to ensure reliability, optimal resource utilization, and high availability
+* **Security Operations**: Deploying protections such as Web Application Firewalls (WAF) and Distributed Denial of Service (DDoS) mitigation.
+
+![rseris](./assets/rseries-before-v2.png)
+
+Handling these operations at the App Services tier and on a per-application basis adds complexity, making application delivery more challenging, such as:
+- Management and "stitching" of multiple app DMZ environments at scale
+- Standardized consistent policy across overall data center deployments
+- Handling unwanted traffic (bad actors and bots) at the global services tier
+
+These challenges compound into serious problems when considering modern microservices app architectures, in particular handling unwanted/unfiltered traffic to app services and API endpoints, and having no uniform security or visibility when managing multiple sites (multiple datacenters and/or clouds). 
+
+**Solution** 
+
+F5 Distributed Cloud services (XC) simplify these challenges by providing centralized security services, which include volumetric DDoS protection, API protection, and Bot mitigation as part of WAF configurations at the network edge. This is possible through the installation and operation of a Customer Edge (CE) in various on-premises environments, such as VMware, OpenShift, Nutanix, or F5’s own rSeries appliances.
 
 (1) **Global Services Tier** 
 - Keeps unwanted traffic off your infrastructure

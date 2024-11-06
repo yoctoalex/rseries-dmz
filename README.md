@@ -299,6 +299,8 @@ Go back to the XC Cloud and navigate to the `Sites`. Wait until the site is depl
 
 ![rseries-sms](./assets/rseries-confirm.png)
 
+If your network does not use DHCP, you may need to configure the network settings manually. Once the site status changes to "Ready," go to the site details and complete the network configuration.
+
 ### 2.1.2 Configure Second rSeries device
 
 Repeat the steps from the [1.3 Deploy and Configure BIG-IP on F5 rSeries](#13-deploy-and-configure-big-ip-on-f5-rseries) section and from the [2.1 Deploy CE Tenant on F5 rSeries](#21-deploy-ce-tenant-on-f5-rseries) section to configure the second rSeries device.
